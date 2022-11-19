@@ -31,7 +31,7 @@ namespace Checkers.Forms.Forms
         private bool _hasContinue = false;
         private Button[,] _checkers;
 
-        private NetworkStream _stream;
+        private MemoryStream _stream;
 
         public int CurrentPlayer { get; private set; }
         public bool IsInTurn { get; private set; }
@@ -78,14 +78,14 @@ namespace Checkers.Forms.Forms
             //    }
             //}
 
-            if (CurrentPlayer == 1)
-            {
-                label2.Text = "Your Turn";
-            }
-            else
-            {
-                label2.Text = "Opponent`s Turn";
-            }
+            //if (CurrentPlayer == 1)
+            //{
+            //    label2.Text = "Your Turn";
+            //}
+            //else
+            //{
+            //    label2.Text = "Opponent`s Turn";
+            //}
 
             IsInTurn = false;
             PreviousButton = null;
@@ -98,8 +98,8 @@ namespace Checkers.Forms.Forms
 
         public void CreateBoard(Board board)
         {
-            panel1.Width = (_boardSize + 1) * (CellSize - 5);
-            panel1.Height = (_boardSize + 1) * (CellSize - 5);
+            Width = (_boardSize + 1) * (CellSize - 5);
+            Height = (_boardSize + 1) * (CellSize - 5);
 
             for (int i = 0; i < _boardSize; i++)
             {
@@ -124,19 +124,19 @@ namespace Checkers.Forms.Forms
                     button.ForeColor = Color.White;
 
                     _checkers[i, j] = button;
+                    Controls.Add(button);
+                    //if (IsHandleCreated)
+                    //{
+                    //    this.BeginInvoke((Action)(() =>
+                    //    {
+                            //Controls.Add(button);
+                    //    }));
+                    //}
+                    //else
+                    //{
+                    //    Controls.Add(button);
+                    //}
 
-                    if (IsHandleCreated)
-                    {
-                        this.BeginInvoke((Action)(() =>
-                        {
-                            panel1.Controls.Add(button);
-                        }));
-                    }
-                    else
-                    {
-                        panel1.Controls.Add(button);
-                    }
-                 
                 }
             }
         }
@@ -280,14 +280,14 @@ namespace Checkers.Forms.Forms
 
         public void SwitchPlayer()
         {
-            if(CurrentPlayer == 1)
-            {
-                label2.Text = "Your Turn";
-            }
-            else
-            {
-                label2.Text = "Opponent`s Turn";
-            }
+            //if(CurrentPlayer == 1)
+            //{
+            //    label2.Text = "Your Turn";
+            //}
+            //else
+            //{
+            //    label2.Text = "Opponent`s Turn";
+            //}
 
             CurrentPlayer = CurrentPlayer == 1 ? 2 : 1;
             //ResetGame();
@@ -937,7 +937,8 @@ namespace Checkers.Forms.Forms
 
             try
             {
-                _stream = TCPClient.Instance.Client.GetStream();
+                _stream = new MemoryStream();
+                TCPClient.Instance.Client.GetStream().CopyTo(_stream);
                 backgroundWorker1.RunWorkerAsync();
                 backgroundWorker2.WorkerSupportsCancellation = true;
             }

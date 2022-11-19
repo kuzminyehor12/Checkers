@@ -28,7 +28,6 @@ namespace Checkers.Forms.Forms
 
         //private Socket _socket;
         //private TcpListener _server;
-        private readonly TcpClient _client;
         private MemoryStream _stream;
         public Board Board { get; set; }
 
@@ -82,14 +81,14 @@ namespace Checkers.Forms.Forms
             //    }
             //}
 
-            if (CurrentPlayer == 1)
-            {
-                label2.Text = "Your Turn";
-            }
-            else
-            {
-                label2.Text = "Opponent`s Turn";
-            }
+            //if (CurrentPlayer == 1)
+            //{
+            //    label2.Text = "Your Turn";
+            //}
+            //else
+            //{
+            //    label2.Text = "Opponent`s Turn";
+            //}
 
             IsInTurn = false;
             PreviousButton = null;
@@ -102,8 +101,8 @@ namespace Checkers.Forms.Forms
 
         public void CreateBoard(Board board)
         {
-            panel1.Width = (_boardSize + 1) * (CellSize - 5);
-            panel1.Height = (_boardSize + 1) * (CellSize - 5);
+            Width = (_boardSize + 1) * (CellSize - 5);
+            Height = (_boardSize + 1) * (CellSize - 5);
 
             for (int i = 0; i < _boardSize; i++)
             {
@@ -128,19 +127,18 @@ namespace Checkers.Forms.Forms
                     button.ForeColor = Color.White;
 
                     _checkers[i, j] = button;
-
-                    if (IsHandleCreated)
-                    {
-                        this.BeginInvoke((Action)(() =>
-                        {
-                            panel1.Controls.Add(button);
-                        }));
-                    }
-                    else
-                    {
-                        panel1.Controls.Add(button);
-                    }
-                 
+                    Controls.Add(button);
+                    //if (IsHandleCreated)
+                    //{
+                    //    this.BeginInvoke((Action)(() =>
+                    //    {
+                    //        Controls.Add(button);
+                    //    }));
+                    //}
+                    //else
+                    //{
+                    //    Controls.Add(button);
+                    //}
                 }
             }
         }
@@ -278,14 +276,14 @@ namespace Checkers.Forms.Forms
 
         public void SwitchPlayer()
         {
-            if(CurrentPlayer == 1)
-            {
-                label2.Text = "Your Turn";
-            }
-            else
-            {
-                label2.Text = "Opponent`s Turn";
-            }
+            //if(CurrentPlayer == 1)
+            //{
+            //    label2.Text = "Your Turn";
+            //}
+            //else
+            //{
+            //    label2.Text = "Opponent`s Turn";
+            //}
 
             CurrentPlayer = CurrentPlayer == 1 ? 2 : 1;
             //ResetGame();
@@ -879,45 +877,45 @@ namespace Checkers.Forms.Forms
             }
         }
 
-        //private void ReceiveMove()
-        //{
-        //    //    byte[] buffer = new byte[byte.MaxValue];
-        //    //    _socket.Receive(buffer);
+        private void ReceiveMove()
+        {
+            //byte[] buffer = new byte[byte.MaxValue];
+            //_socket.Receive(buffer);
 
-        //    //    IFormatter formatter = new BinaryFormatter();
-        //    //    using (MemoryStream stream = new MemoryStream(buffer))
-        //    //    {
-        //    //        var board = formatter.Deserialize(stream);
-        //    //        Board = board as Board;
+            //IFormatter formatter = new BinaryFormatter();
+            //using (MemoryStream stream = new MemoryStream(buffer))
+            //{
+            //    var board = formatter.Deserialize(stream);
+            //    Board = board as Board;
 
-        //    //        if (!_receiver.IsBusy)
-        //    //        {
-        //    //            _receiver.RunWorkerAsync();
-        //    //        }
+            //    if (!_receiver.IsBusy)
+            //    {
+            //        _receiver.RunWorkerAsync();
+            //    }
 
-        //    //        CreateBoard(this.Board);
-        //    //    }
+            //    CreateBoard(this.Board);
+            //}
 
-        //    try
-        //    {
-        //        if(_client?.Connected == true)
-        //        {
+            //try
+            //{
+            //    if (_client?.Connected == true)
+            //    {
 
-        //            IFormatter formatter = new BinaryFormatter();
-        //            using (NetworkStream stream = _client.GetStream())
-        //            {
-        //                var board = formatter.Deserialize(stream);
-        //                Board = board as Board;
+            //        IFormatter formatter = new BinaryFormatter();
+            //        using (NetworkStream stream = _client.GetStream())
+            //        {
+            //            var board = formatter.Deserialize(stream);
+            //            Board = board as Board;
 
-        //                CreateBoard(this.Board);
-        //            }
-        //        }
-        //    }
-        //    catch (Exception ex)
-        //    {
-        //        MessageBox.Show(ex.Message);
-        //    }
-        //}
+            //            CreateBoard(this.Board);
+            //        }
+            //    }
+            //}
+            //catch (Exception ex)
+            //{
+            //    MessageBox.Show(ex.Message);
+            //}
+        }
 
         private void CheckersForm_FormClosing(object sender, FormClosingEventArgs e)
         {
@@ -933,7 +931,8 @@ namespace Checkers.Forms.Forms
                 //_reader = new StreamReader(TCPServer.Instance.Client.GetStream());
                 //_writer = new StreamWriter(TCPServer.Instance.Client.GetStream());
                 //_writer.AutoFlush = true;
-               // _stream = TCPServer.Instance.Client.GetStream();
+                _stream = new MemoryStream();
+                TCPServer.Instance.Client.GetStream().CopyTo(_stream);
                 backgroundWorker1.RunWorkerAsync();
                 backgroundWorker2.WorkerSupportsCancellation = true;
             }
