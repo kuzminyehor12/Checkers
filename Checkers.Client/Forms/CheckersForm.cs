@@ -937,10 +937,13 @@ namespace Checkers.Forms.Forms
 
             try
             {
-                _stream = new MemoryStream();
-                TCPClient.Instance.Client.GetStream().CopyTo(_stream);
-                backgroundWorker1.RunWorkerAsync();
-                backgroundWorker2.WorkerSupportsCancellation = true;
+                if (TCPClient.Instance.Client.Connected)
+                {
+                    _stream = new MemoryStream();
+                    //TCPClient.Instance.Client.GetStream().CopyTo(_stream);
+                    backgroundWorker1.RunWorkerAsync();
+                    backgroundWorker2.WorkerSupportsCancellation = true;
+                }
             }
             catch (Exception ex)
             {

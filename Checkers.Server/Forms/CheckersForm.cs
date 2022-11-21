@@ -932,7 +932,7 @@ namespace Checkers.Forms.Forms
                 //_writer = new StreamWriter(TCPServer.Instance.Client.GetStream());
                 //_writer.AutoFlush = true;
                 _stream = new MemoryStream();
-                TCPServer.Instance.Client.GetStream().CopyTo(_stream);
+                //TCPServer.Instance.Client.GetStream().CopyTo(_stream);
                 backgroundWorker1.RunWorkerAsync();
                 backgroundWorker2.WorkerSupportsCancellation = true;
             }

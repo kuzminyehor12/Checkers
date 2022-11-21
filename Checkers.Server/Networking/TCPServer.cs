@@ -30,11 +30,6 @@ namespace Checkers.Server.Networking
             }
         }
 
-        public TCPServer()
-        {
-            Client = new TcpClient();
-        }
-
         public void Start(string ip, string port)
         {
             try
