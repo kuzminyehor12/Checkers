@@ -49,7 +49,7 @@ namespace Checkers.Forms.Forms
             this.textBox1.Name = "textBox1";
             this.textBox1.Size = new System.Drawing.Size(308, 34);
             this.textBox1.TabIndex = 1;
-            this.textBox1.Text = "192.168.0.104";
+            this.textBox1.Text = "26.51.7.192";
             // 
             // label1
             // 
@@ -99,7 +99,7 @@ namespace Checkers.Forms.Forms
             this.textBox2.Name = "textBox2";
             this.textBox2.Size = new System.Drawing.Size(152, 34);
             this.textBox2.TabIndex = 5;
-            this.textBox2.Text = "6666";
+            this.textBox2.Text = "7777";
             // 
             // label4
             // 

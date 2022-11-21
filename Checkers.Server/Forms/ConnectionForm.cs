@@ -24,18 +24,17 @@ namespace Checkers.Forms.Forms
 
         private string GetIP()
         {
-            IPAddress[] localIp = Dns.GetHostAddresses(Dns.GetHostName());
+            IPHostEntry hostEntry = Dns.GetHostEntry(Environment.MachineName);
 
-            string ipAddress = "";
-
-            foreach (var address in localIp)
+            foreach (IPAddress address in hostEntry.AddressList)
             {
                 if (address.AddressFamily == AddressFamily.InterNetwork)
                 {
-                    ipAddress = address.ToString();
+                    return address.ToString();
                 }
             }
-            return ipAddress;
+
+            return null;
         }
 
         private void button2_Click(object sender, EventArgs e)

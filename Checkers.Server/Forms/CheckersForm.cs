@@ -21,7 +21,6 @@ namespace Checkers.Forms.Forms
     {
         private const string PicturePath = @"C:\Users\EgorKuzmin\Pictures\Saved Pictures\";
         private readonly Size PictureSize;
-        private const int Port = 7024;
 
         private int _boardSize;
         private const int CellSize = 100;
