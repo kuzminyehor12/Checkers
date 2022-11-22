@@ -596,7 +596,6 @@ namespace Checkers.Forms.Forms
             {
                 CloseSimpleSteps(toClose);
             }
-
         }
 
         public bool IsButtonHasBeatStep(int rowIndex, int columnIndex, bool isKing, int[] direction)
