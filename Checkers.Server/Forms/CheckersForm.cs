@@ -97,55 +97,47 @@ namespace Checkers.Forms.Forms
 
         public void CreateBoard()
         {
-            foreach (var item in Controls)
+            this.Invoke(new Action(() =>
             {
-                if (item is Button b)
+                foreach (var item in Controls)
                 {
-                    b.Click -= OnCheckerPressed;
+                    if (item is Button b)
+                    {
+                        b.Click -= OnCheckerPressed;
+                    }
                 }
-            }
 
-            Controls.Clear();
-            Width = (_boardSize + 1) * (CellSize - 5);
-            Height = (_boardSize + 1) * (CellSize - 5);
+                Controls.Clear();
+                Width = (_boardSize + 1) * (CellSize - 5);
+                Height = (_boardSize + 1) * (CellSize - 5);
 
-            for (int i = 0; i < _boardSize; i++)
-            {
-                for (int j = 0; j < _boardSize; j++)
+                for (int i = 0; i < _boardSize; i++)
                 {
-                    Button button = new Button();
-                    button.Location = new Point(j * CellSize, i * CellSize);
-                    button.Size = new Size(CellSize, CellSize);
-                    button.Click += OnCheckerPressed;
-
-                    if (Board[i, j] == 1)
+                    for (int j = 0; j < _boardSize; j++)
                     {
-                        button.Image = _whiteChecker;
+                        Button button = new Button();
+                        button.Location = new Point(j * CellSize, i * CellSize);
+                        button.Size = new Size(CellSize, CellSize);
+                        button.Click += OnCheckerPressed;
+
+                        if (Board[i, j] == 1)
+                        {
+                            button.Image = _whiteChecker;
+                        }
+
+                        if (Board[i, j] == 2)
+                        {
+                            button.Image = _blackChecker;
+                        }
+
+                        button.BackColor = GetPrevButtonColor(button);
+                        button.ForeColor = Color.White;
+
+                        _checkers[i, j] = button;
+                        Controls.Add(button);
                     }
-
-                    if (Board[i, j] == 2)
-                    {
-                        button.Image = _blackChecker;
-                    }
-
-                    button.BackColor = GetPrevButtonColor(button);
-                    button.ForeColor = Color.White;
-
-                    _checkers[i, j] = button;
-                    Controls.Add(button);
-                    //if (IsHandleCreated)
-                    //{
-                    //    this.BeginInvoke((Action)(() =>
-                    //    {
-                    //        Controls.Add(button);
-                    //    }));
-                    //}
-                    //else
-                    //{
-                    //    Controls.Add(button);
-                    //}
                 }
-            }
+            }));
         }
 
         public Color GetPrevButtonColor(Button prevButton)
