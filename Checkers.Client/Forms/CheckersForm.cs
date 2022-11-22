@@ -178,7 +178,7 @@ namespace Checkers.Forms.Forms
 
         public void OnCheckerPressed(object sender, EventArgs args)
         {
-            Invoke(new Action(() =>
+            this.Invoke(new Action(() =>
             {
                 if (PreviousButton != null)
                 {
@@ -255,7 +255,8 @@ namespace Checkers.Forms.Forms
                         if (_beatStepsCount == 0 || !_hasContinue)
                         {
                             CloseSteps();
-                            //SwitchPlayer();
+                            SwitchPlayer();
+                            backgroundWorker2.RunWorkerAsync();
                             ShowPossibleSteps();
                             _hasContinue = false;
                         }
@@ -265,8 +266,6 @@ namespace Checkers.Forms.Forms
                             PressedButton.Enabled = true;
                             IsInTurn = true;
                         }
-
-                        backgroundWorker2.RunWorkerAsync();
                     }
                 }
 
@@ -277,8 +276,6 @@ namespace Checkers.Forms.Forms
         public void SwitchPlayer()
         {
             //this.Text = AlternativeTurn;
-           // (CurrentTurn, AlternativeTurn) = (AlternativeTurn, CurrentTurn);
-
             //ResetGame();
         }
 
