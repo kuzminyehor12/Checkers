@@ -178,70 +178,23 @@ namespace Checkers.Forms.Forms
 
         public void OnCheckerPressed(object sender, EventArgs args)
         {
-            if (PreviousButton != null)
+            Invoke(new Action(() =>
             {
-                PreviousButton.BackColor = GetPrevButtonColor(PreviousButton);
-            }
-
-            PressedButton = sender as Button;
-
-            if (Board[PressedButton.GetRelativeY(CellSize), PressedButton.GetRelativeX(CellSize)] != 0
-                && Board[PressedButton.GetRelativeY(CellSize), PressedButton.GetRelativeX(CellSize)] == CurrentPlayer)
-            {
-                CloseSteps();
-                PressedButton.BackColor = Color.Red;
-                DeactivateAllButtons();
-                PressedButton.Enabled = true;
-                _beatStepsCount = 0;
-
-                if (PressedButton.Text == "King")
+                if (PreviousButton != null)
                 {
-                    ShowSteps(PressedButton.GetRelativeY(CellSize), PressedButton.GetRelativeX(CellSize), false);
-                }
-                else
-                {
-                    ShowSteps(PressedButton.GetRelativeY(CellSize), PressedButton.GetRelativeX(CellSize));
+                    PreviousButton.BackColor = GetPrevButtonColor(PreviousButton);
                 }
 
-                if (IsInTurn)
+                PressedButton = sender as Button;
+
+                if (Board[PressedButton.GetRelativeY(CellSize), PressedButton.GetRelativeX(CellSize)] != 0
+                    && Board[PressedButton.GetRelativeY(CellSize), PressedButton.GetRelativeX(CellSize)] == CurrentPlayer)
                 {
                     CloseSteps();
-                    PressedButton.BackColor = GetPrevButtonColor(PressedButton);
-                    ShowPossibleSteps();
-                    IsInTurn = false;
-                }
-                else
-                {
-                    IsInTurn = true;
-                }
-
-                backgroundWorker2.RunWorkerAsync();
-            }
-            else
-            {
-                if (IsInTurn)
-                {
-                    _hasContinue = false;
-                    if (Math.Abs(PressedButton.GetRelativeX(CellSize) - PreviousButton.GetRelativeX(CellSize)) > 1)
-                    {
-                        _hasContinue = true;
-                        RemoveBeaten(PressedButton, PreviousButton);
-                    }
-
-                    (Board[PressedButton.GetRelativeY(CellSize), PressedButton.GetRelativeX(CellSize)], Board[PreviousButton.GetRelativeY(CellSize), PreviousButton.GetRelativeX(CellSize)])
-                        = (Board[PreviousButton.GetRelativeY(CellSize), PreviousButton.GetRelativeX(CellSize)], Board[PressedButton.GetRelativeY(CellSize), PressedButton.GetRelativeX(CellSize)]);
-
-                    PressedButton.Image = PreviousButton.Image;
-                    PreviousButton.Image = null;
-                    PressedButton.Text = PreviousButton.Text;
-                    PreviousButton.Text = "";
-
-                    SwitchButtonToKing(PressedButton);
-                    _beatStepsCount = 0;
-                    IsInTurn = false;
-
-                    CloseSteps();
+                    PressedButton.BackColor = Color.Red;
                     DeactivateAllButtons();
+                    PressedButton.Enabled = true;
+                    _beatStepsCount = 0;
 
                     if (PressedButton.Text == "King")
                     {
@@ -252,25 +205,73 @@ namespace Checkers.Forms.Forms
                         ShowSteps(PressedButton.GetRelativeY(CellSize), PressedButton.GetRelativeX(CellSize));
                     }
 
-                    if (_beatStepsCount == 0 || !_hasContinue)
+                    if (IsInTurn)
                     {
                         CloseSteps();
-                        SwitchPlayer();
+                        PressedButton.BackColor = GetPrevButtonColor(PressedButton);
                         ShowPossibleSteps();
-                        _hasContinue = false;
+                        IsInTurn = false;
                     }
-                    else if (_hasContinue)
+                    else
                     {
-                        PressedButton.BackColor = Color.Red;
-                        PressedButton.Enabled = true;
                         IsInTurn = true;
                     }
-
-                    backgroundWorker2.RunWorkerAsync();
                 }
-            }
+                else
+                {
+                    if (IsInTurn)
+                    {
+                        _hasContinue = false;
+                        if (Math.Abs(PressedButton.GetRelativeX(CellSize) - PreviousButton.GetRelativeX(CellSize)) > 1)
+                        {
+                            _hasContinue = true;
+                            RemoveBeaten(PressedButton, PreviousButton);
+                        }
 
-            PreviousButton = PressedButton;
+                        (Board[PressedButton.GetRelativeY(CellSize), PressedButton.GetRelativeX(CellSize)], Board[PreviousButton.GetRelativeY(CellSize), PreviousButton.GetRelativeX(CellSize)])
+                            = (Board[PreviousButton.GetRelativeY(CellSize), PreviousButton.GetRelativeX(CellSize)], Board[PressedButton.GetRelativeY(CellSize), PressedButton.GetRelativeX(CellSize)]);
+
+                        PressedButton.Image = PreviousButton.Image;
+                        PreviousButton.Image = null;
+                        PressedButton.Text = PreviousButton.Text;
+                        PreviousButton.Text = "";
+
+                        SwitchButtonToKing(PressedButton);
+                        _beatStepsCount = 0;
+                        IsInTurn = false;
+
+                        CloseSteps();
+                        DeactivateAllButtons();
+
+                        if (PressedButton.Text == "King")
+                        {
+                            ShowSteps(PressedButton.GetRelativeY(CellSize), PressedButton.GetRelativeX(CellSize), false);
+                        }
+                        else
+                        {
+                            ShowSteps(PressedButton.GetRelativeY(CellSize), PressedButton.GetRelativeX(CellSize));
+                        }
+
+                        if (_beatStepsCount == 0 || !_hasContinue)
+                        {
+                            CloseSteps();
+                            //SwitchPlayer();
+                            ShowPossibleSteps();
+                            _hasContinue = false;
+                        }
+                        else if (_hasContinue)
+                        {
+                            PressedButton.BackColor = Color.Red;
+                            PressedButton.Enabled = true;
+                            IsInTurn = true;
+                        }
+
+                        backgroundWorker2.RunWorkerAsync();
+                    }
+                }
+
+                PreviousButton = PressedButton;
+            }));
         }
 
         public void SwitchPlayer()
@@ -877,8 +878,8 @@ namespace Checkers.Forms.Forms
         {
             try
             {
-                CurrentTurn = "Your Turn";
-                AlternativeTurn = "Opponent`s Turn";
+                //CurrentTurn = "Your Turn";
+                //AlternativeTurn = "Opponent`s Turn";
                 //this.Text = CurrentTurn;
                 Board.Parse(unparsedBoard);
                 CreateBoardWithBackgroundWorker();
