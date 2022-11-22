@@ -56,7 +56,7 @@ namespace Checkers.Forms.Forms
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(799, 874);
             this.Name = "CheckersForm";
-            this.Text = "CheckersForm";
+            this.Text = "Opponent`s Turn";
             this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(this.CheckersForm_FormClosing);
             this.FormClosed += new System.Windows.Forms.FormClosedEventHandler(this.CheckersForm_FormClosed);
             this.Load += new System.EventHandler(this.CheckersForm_Load);

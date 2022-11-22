@@ -21,6 +21,8 @@ namespace Checkers.Forms.Forms
     {
         private const string PicturePath = @"C:\Users\EgorKuzmin\Pictures\Saved Pictures\";
         private readonly Size PictureSize;
+        public string CurrentTurn { get; set; } = "Opponent`s Turn";
+        public string AlternativeTurn { get; set; } = "Your Turn";
 
         private int _boardSize;
         private const int CellSize = 100;
@@ -30,7 +32,6 @@ namespace Checkers.Forms.Forms
         private int _beatStepsCount = 0;
         private bool _hasContinue = false;
         private Button[,] _checkers;
-        private string unparsedBoard = string.Empty;
 
         //private Stream _stream;
         private StreamReader _reader;
@@ -99,49 +100,64 @@ namespace Checkers.Forms.Forms
             CreateBoard();
         }
 
-        public void CreateBoard()
+        public void CreateBoardWithBackgroundWorker()
         {
             this.Invoke(new Action(() =>
             {
-                foreach (var item in Controls)
+                foreach (var checker in _checkers)
                 {
-                    if (item is Button b)
-                    {
-                        b.Click -= OnCheckerPressed;
-                    }
+                    checker.Image = null;
                 }
-
-                Controls.Clear();
-                Width = (_boardSize + 1) * (CellSize - 5);
-                Height = (_boardSize + 1) * (CellSize - 5);
 
                 for (int i = 0; i < _boardSize; i++)
                 {
                     for (int j = 0; j < _boardSize; j++)
                     {
-                        Button button = new Button();
-                        button.Location = new Point(j * CellSize, i * CellSize);
-                        button.Size = new Size(CellSize, CellSize);
-                        button.Click += OnCheckerPressed;
-
                         if (Board[i, j] == 1)
                         {
-                            button.Image = _whiteChecker;
+                            _checkers[i, j].Image = _whiteChecker;
                         }
 
                         if (Board[i, j] == 2)
                         {
-                            button.Image = _blackChecker;
+                            _checkers[i, j].Image = _blackChecker;
                         }
-
-                        button.BackColor = GetPrevButtonColor(button);
-                        button.ForeColor = Color.White;
-
-                        _checkers[i, j] = button;
-                        Controls.Add(button);
                     }
                 }
             }));
+        }
+
+        public void CreateBoard()
+        {
+             Width = (_boardSize + 1) * (CellSize - 5);
+             Height = (_boardSize + 1) * (CellSize - 5);
+
+             for (int i = 0; i < _boardSize; i++)
+             {
+                 for (int j = 0; j < _boardSize; j++)
+                 {
+                     Button button = new Button();
+                     button.Location = new Point(j * CellSize, i * CellSize);
+                     button.Size = new Size(CellSize, CellSize);
+                     button.Click += OnCheckerPressed;
+
+                     if (Board[i, j] == 1)
+                     {
+                         button.Image = _whiteChecker;
+                     }
+
+                     if (Board[i, j] == 2)
+                     {
+                         button.Image = _blackChecker;
+                     }
+
+                     button.BackColor = GetPrevButtonColor(button);
+                     button.ForeColor = Color.White;
+
+                     _checkers[i, j] = button;
+                     Controls.Add(button);
+                 }
+             }
         }
 
         public Color GetPrevButtonColor(Button prevButton)
@@ -198,6 +214,8 @@ namespace Checkers.Forms.Forms
                 {
                     IsInTurn = true;
                 }
+
+                backgroundWorker2.RunWorkerAsync();
             }
             else
             {
@@ -217,18 +235,6 @@ namespace Checkers.Forms.Forms
                     PreviousButton.Image = null;
                     PressedButton.Text = PreviousButton.Text;
                     PreviousButton.Text = "";
-
-                    //var pressedButtonIndexes = _checkers.Find(PressedButton);
-                    //var prevButtonIndexes = _checkers.Find(PreviousButton);
-
-                    //if (PressedButton.Image == _whiteChecker)
-                    //{
-                    //    buffer = new byte[] { 0, (byte)pressedButtonIndexes.Item1, (byte)pressedButtonIndexes.Item2, (byte)prevButtonIndexes.Item1, (byte)prevButtonIndexes.Item2 };
-                    //}
-                    //else
-                    //{
-                    //    buffer = new byte[] { 1, (byte)pressedButtonIndexes.Item1, (byte)pressedButtonIndexes.Item2, (byte)prevButtonIndexes.Item1, (byte)prevButtonIndexes.Item2 };
-                    //}
 
                     SwitchButtonToKing(PressedButton);
                     _beatStepsCount = 0;
@@ -250,20 +256,6 @@ namespace Checkers.Forms.Forms
                     {
                         CloseSteps();
                         SwitchPlayer();
-
-                        //IFormatter formatter = new BinaryFormatter();
-                        //using (NetworkStream stream = _client.GetStream())
-                        //{
-                        //    formatter.Serialize(stream, Board);
-                        //    //var buffer = stream;
-                        //    //_socket.Send(buffer);
-
-                        //    if (!_receiver.IsBusy)
-                        //    {
-                        //        _receiver.RunWorkerAsync();
-                        //    }
-                        //}
-
                         ShowPossibleSteps();
                         _hasContinue = false;
                     }
@@ -274,7 +266,6 @@ namespace Checkers.Forms.Forms
                         IsInTurn = true;
                     }
 
-                    //Board.WriteToStream(_writer);
                     backgroundWorker2.RunWorkerAsync();
                 }
             }
@@ -284,45 +275,42 @@ namespace Checkers.Forms.Forms
 
         public void SwitchPlayer()
         {
-            //if(CurrentPlayer == 1)
-            //{
-            //    label2.Text = "Your Turn";
-            //}
-            //else
-            //{
-            //    label2.Text = "Opponent`s Turn";
-            //}
+            //this.Text = AlternativeTurn;
+           // (CurrentTurn, AlternativeTurn) = (AlternativeTurn, CurrentTurn);
 
-            //CurrentPlayer = CurrentPlayer == 1 ? 2 : 1;
             //ResetGame();
         }
 
-        //public void ResetGame()
-        //{
-        //    bool isPlayer1HasCheckers = false;
-        //    bool isPlayer2HasCheckers = false;
+        public void ResetGame()
+        {
+            bool isPlayer1HasCheckers = false;
+            bool isPlayer2HasCheckers = false;
 
-        //    for (int i = 0; i < _boardSize; i++)
-        //    {
-        //        for (int j = 0; j < _boardSize; j++)
-        //        {
-        //            if (Board[i, j] == 1)
-        //            {
-        //                isPlayer1HasCheckers = true;
-        //            }
-                        
-        //            if (Board[i, j] == 2)
-        //            {
-        //                isPlayer2HasCheckers = true;
-        //            }
-        //        }
-        //    }
+            for (int i = 0; i < _boardSize; i++)
+            {
+                for (int j = 0; j < _boardSize; j++)
+                {
+                    if (Board[i, j] == 1)
+                    {
+                        isPlayer1HasCheckers = true;
+                    }
 
-        //    if (!isPlayer1HasCheckers || !isPlayer2HasCheckers)
-        //    {
-        //        this.Controls.Clear();
-        //    }
-        //}
+                    if (Board[i, j] == 2)
+                    {
+                        isPlayer2HasCheckers = true;
+                    }
+                }
+            }
+
+            if (!isPlayer1HasCheckers)
+            {
+                MessageBox.Show("You win!");
+            }
+            else if(!isPlayer2HasCheckers)
+            {
+                MessageBox.Show("You lose!");
+            }
+        }
 
 
         public void ShowPossibleSteps()
@@ -397,10 +385,10 @@ namespace Checkers.Forms.Forms
 
         }
 
-        public void ShowSteps(int rowIndex, int columnIndex, bool isKing = true)
+        public void ShowSteps(int rowIndex, int columnIndex, bool isNotKing = true)
         {
             _simpleSteps.Clear();
-            ShowDiagonal(rowIndex, columnIndex, isKing);
+            ShowDiagonal(rowIndex, columnIndex, isNotKing);
 
             if (_beatStepsCount > 0)
             {
@@ -408,12 +396,12 @@ namespace Checkers.Forms.Forms
             }
         }
 
-        public void ShowDiagonal(int rowIndex, int columnIndex, bool isKing = false)
+        public void ShowDiagonal(int rowIndex, int columnIndex, bool isNotKing = false)
         {
             int j = columnIndex + 1;
             for (int i = rowIndex - 1; i >= 0; i--)
             {
-                if (CurrentPlayer == 1 && isKing && !_hasContinue)
+                if (CurrentPlayer == 1 && isNotKing && !_hasContinue)
                 {
                     break;
                 }
@@ -435,7 +423,7 @@ namespace Checkers.Forms.Forms
                     break;
                 }
 
-                if (isKing)
+                if (isNotKing)
                 {
                     break;
                 }
@@ -444,7 +432,7 @@ namespace Checkers.Forms.Forms
             j = columnIndex - 1;
             for (int i = rowIndex - 1; i >= 0; i--)
             {
-                if (CurrentPlayer == 1 && isKing && !_hasContinue)
+                if (CurrentPlayer == 1 && isNotKing && !_hasContinue)
                 { 
                     break; 
                 }
@@ -466,7 +454,7 @@ namespace Checkers.Forms.Forms
                     break; 
                 }
 
-                if (isKing)
+                if (isNotKing)
                 {
                     break;
                 }
@@ -475,7 +463,7 @@ namespace Checkers.Forms.Forms
             j = columnIndex - 1;
             for (int i = rowIndex + 1; i < 8; i++)
             {
-                if (CurrentPlayer == 2 && isKing && !_hasContinue)
+                if (CurrentPlayer == 2 && isNotKing && !_hasContinue)
                 { 
                     break;
                 }
@@ -497,7 +485,7 @@ namespace Checkers.Forms.Forms
                     break;
                 }
 
-                if (isKing)
+                if (isNotKing)
                 {
                     break;
                 }
@@ -506,7 +494,7 @@ namespace Checkers.Forms.Forms
             j = columnIndex + 1;
             for (int i = rowIndex + 1; i < 8; i++)
             {
-                if (CurrentPlayer == 2 && isKing && !_hasContinue) 
+                if (CurrentPlayer == 2 && isNotKing && !_hasContinue) 
                 { 
                     break;
                 }
@@ -528,7 +516,7 @@ namespace Checkers.Forms.Forms
                     break;
                 }
 
-                if (isKing)
+                if (isNotKing)
                 {
                     break;
                 }
@@ -889,18 +877,11 @@ namespace Checkers.Forms.Forms
         {
             try
             {
-                MessageBox.Show("In turn");
-                if (string.IsNullOrEmpty(unparsedBoard))
-                {
-                    return;
-                }
-
-                Debug.WriteLine(unparsedBoard);
-                Board board = new Board();
-                board.Parse(unparsedBoard);
-                Debug.Write(board.ToString());
-                board.CopyTo(Board);
-                CreateBoard();
+                CurrentTurn = "Your Turn";
+                AlternativeTurn = "Opponent`s Turn";
+                //this.Text = CurrentTurn;
+                Board.Parse(unparsedBoard);
+                CreateBoardWithBackgroundWorker();
             }
             catch (Exception ex)
             {
@@ -926,6 +907,7 @@ namespace Checkers.Forms.Forms
                     _writer = new StreamWriter(TCPClient.Instance.Client.GetStream());
                     _writer.AutoFlush = true;
                     backgroundWorker1.RunWorkerAsync();
+                    backgroundWorker1.WorkerSupportsCancellation = false;
                     backgroundWorker2.WorkerSupportsCancellation = true;
                 }
             }
@@ -960,9 +942,12 @@ namespace Checkers.Forms.Forms
             {
                 try
                 {
-                    unparsedBoard = _reader.ReadToEnd();
-                    ReceiveMove(unparsedBoard);
-                    unparsedBoard = string.Empty;
+                    var unparsedBoard = _reader.ReadLine();
+
+                    if (!string.IsNullOrEmpty(unparsedBoard))
+                    {
+                        ReceiveMove(unparsedBoard);
+                    }
                 }
                 catch (Exception ex)
                 {

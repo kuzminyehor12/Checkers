@@ -1,6 +1,7 @@
 ﻿using Checkers.Forms.Models;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Text;
 using System.Windows.Forms;
@@ -27,13 +28,16 @@ namespace Checkers.Forms.Extensions
 
         public static void WriteToStream(this Board board, StreamWriter writer)
         {
+            string res = "";
             for (int i = 0; i < board.GetSize(); i++)
             {
                 for (int j = 0; j < board.GetSize(); j++)
                 {
-                    writer.Write(board[i, j]);
+                    res += byte.Parse(board[i, j].ToString());
                 }
             }
+
+            writer.WriteLine(res);
         }
 
         public static void Parse(this Board board, string unparsed)
