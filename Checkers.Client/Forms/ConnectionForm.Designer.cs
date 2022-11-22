@@ -35,8 +35,6 @@ namespace Checkers.Forms.Forms
             this.label2 = new System.Windows.Forms.Label();
             this.label3 = new System.Windows.Forms.Label();
             this.textBox2 = new System.Windows.Forms.TextBox();
-            this.label4 = new System.Windows.Forms.Label();
-            this.textBox3 = new System.Windows.Forms.TextBox();
             this.label5 = new System.Windows.Forms.Label();
             this.textBox4 = new System.Windows.Forms.TextBox();
             this.label6 = new System.Windows.Forms.Label();
@@ -64,7 +62,7 @@ namespace Checkers.Forms.Forms
             // button2
             // 
             this.button2.Font = new System.Drawing.Font("Segoe UI", 14F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
-            this.button2.Location = new System.Drawing.Point(184, 336);
+            this.button2.Location = new System.Drawing.Point(184, 288);
             this.button2.Name = "button2";
             this.button2.Size = new System.Drawing.Size(216, 47);
             this.button2.TabIndex = 3;
@@ -101,24 +99,6 @@ namespace Checkers.Forms.Forms
             this.textBox2.TabIndex = 5;
             this.textBox2.Text = "7777";
             // 
-            // label4
-            // 
-            this.label4.AutoSize = true;
-            this.label4.Font = new System.Drawing.Font("Segoe UI", 14F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
-            this.label4.Location = new System.Drawing.Point(15, 276);
-            this.label4.Name = "label4";
-            this.label4.Size = new System.Drawing.Size(116, 32);
-            this.label4.TabIndex = 10;
-            this.label4.Text = "Password:";
-            // 
-            // textBox3
-            // 
-            this.textBox3.Font = new System.Drawing.Font("Segoe UI", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
-            this.textBox3.Location = new System.Drawing.Point(137, 276);
-            this.textBox3.Name = "textBox3";
-            this.textBox3.Size = new System.Drawing.Size(308, 34);
-            this.textBox3.TabIndex = 9;
-            // 
             // label5
             // 
             this.label5.AutoSize = true;
@@ -150,10 +130,8 @@ namespace Checkers.Forms.Forms
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 20F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(595, 395);
+            this.ClientSize = new System.Drawing.Size(595, 367);
             this.Controls.Add(this.label6);
-            this.Controls.Add(this.label4);
-            this.Controls.Add(this.textBox3);
             this.Controls.Add(this.label5);
             this.Controls.Add(this.textBox4);
             this.Controls.Add(this.label3);
@@ -178,8 +156,6 @@ namespace Checkers.Forms.Forms
         private System.Windows.Forms.Label label2;
         private System.Windows.Forms.Label label3;
         private System.Windows.Forms.TextBox textBox2;
-        private System.Windows.Forms.Label label4;
-        private System.Windows.Forms.TextBox textBox3;
         private System.Windows.Forms.Label label5;
         private System.Windows.Forms.TextBox textBox4;
         private System.Windows.Forms.Label label6;

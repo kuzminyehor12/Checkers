@@ -8,10 +8,10 @@ namespace Checkers.Forms.Models
     [Serializable]
     public class Board : IEnumerable<int>
     {
-        private byte[,] _board;
+        private int[,] _board;
         public const int BoardSize = 8;
 
-        public byte this[int i, int j]
+        public int this[int i, int j]
         {
             get
             {
@@ -24,7 +24,7 @@ namespace Checkers.Forms.Models
         }
         public Board()
         {
-            _board = new byte[BoardSize, BoardSize]{
+            _board = new int[BoardSize, BoardSize]{
                 { 0, 1, 0, 1, 0, 1, 0, 1 },
                 { 1, 0, 1, 0, 1, 0, 1, 0 },
                 { 0, 1, 0, 1, 0, 1, 0, 1 },
@@ -36,7 +36,7 @@ namespace Checkers.Forms.Models
             };
         }
 
-        public Board(byte[,] bytes)
+        public Board(int[,] bytes)
         {
             _board = bytes;
         }
@@ -44,6 +44,17 @@ namespace Checkers.Forms.Models
         public int GetSize()
         {
             return BoardSize;
+        }
+
+        public void CopyTo(Board board)
+        {
+            for (int i = 0; i < GetSize(); i++)
+            {
+                for (int j = 0; j < GetSize(); j++)
+                {
+                    board[i, j] = this[i, j];
+                }
+            }
         }
 
         public IEnumerator<int> GetEnumerator()

@@ -4,15 +4,9 @@ using Checkers.Server.Networking;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
-using System.Data;
+using System.Diagnostics;
 using System.Drawing;
 using System.IO;
-using System.Linq;
-using System.Net.Sockets;
-using System.Runtime.Serialization;
-using System.Runtime.Serialization.Formatters.Binary;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows.Forms;
 
 namespace Checkers.Forms.Forms
@@ -27,13 +21,16 @@ namespace Checkers.Forms.Forms
 
         //private Socket _socket;
         //private TcpListener _server;
-        private MemoryStream _stream;
+        //private Stream _stream;
+        private StreamReader _reader;
+        private StreamWriter _writer;
         public Board Board { get; set; }
 
         private List<Button> _simpleSteps = new List<Button>();
         private int _beatStepsCount = 0;
         private bool _hasContinue = false;
         private Button[,] _checkers;
+        private string unparsedBoard = string.Empty;
 
         public int CurrentPlayer { get; private set; }
         public bool IsInTurn { get; private set; }
@@ -95,11 +92,20 @@ namespace Checkers.Forms.Forms
             _blackChecker = new Bitmap(new Bitmap(PicturePath + "black-removebg-preview.png"), PictureSize);
             _whiteChecker = new Bitmap(new Bitmap(PicturePath + "red-removebg-preview.png"), PictureSize);
 
-            CreateBoard(this.Board);
+            CreateBoard();
         }
 
-        public void CreateBoard(Board board)
+        public void CreateBoard()
         {
+            foreach (var item in Controls)
+            {
+                if (item is Button b)
+                {
+                    b.Click -= OnCheckerPressed;
+                }
+            }
+
+            Controls.Clear();
             Width = (_boardSize + 1) * (CellSize - 5);
             Height = (_boardSize + 1) * (CellSize - 5);
 
@@ -112,12 +118,12 @@ namespace Checkers.Forms.Forms
                     button.Size = new Size(CellSize, CellSize);
                     button.Click += OnCheckerPressed;
 
-                    if (board[i, j] == 1)
+                    if (Board[i, j] == 1)
                     {
                         button.Image = _whiteChecker;
                     }
 
-                    if (board[i, j] == 2)
+                    if (Board[i, j] == 2)
                     {
                         button.Image = _blackChecker;
                     }
@@ -248,8 +254,7 @@ namespace Checkers.Forms.Forms
                     {
                         CloseSteps();
                         SwitchPlayer();
-
-                        backgroundWorker2.RunWorkerAsync();
+                        
                         //IFormatter formatter = new BinaryFormatter();
                         //using (NetworkStream stream = _client.GetStream())
                         //{
@@ -267,6 +272,10 @@ namespace Checkers.Forms.Forms
                         PressedButton.Enabled = true;
                         IsInTurn = true;
                     }
+
+                    //Board.WriteToStream(_writer);
+                    backgroundWorker2.RunWorkerAsync();
+                    //CreateBoard(this.Board);
                 }
             }
 
@@ -284,7 +293,7 @@ namespace Checkers.Forms.Forms
             //    label2.Text = "Opponent`s Turn";
             //}
 
-            CurrentPlayer = CurrentPlayer == 1 ? 2 : 1;
+            //CurrentPlayer = CurrentPlayer == 1 ? 2 : 1;
             //ResetGame();
         }
 
@@ -876,44 +885,27 @@ namespace Checkers.Forms.Forms
             }
         }
 
-        private void ReceiveMove()
+        private void ReceiveMove(string unparsedBoard)
         {
-            //byte[] buffer = new byte[byte.MaxValue];
-            //_socket.Receive(buffer);
+            try
+            {
+                MessageBox.Show("In turn");
+                if (string.IsNullOrEmpty(unparsedBoard))
+                {
+                    return;
+                }
 
-            //IFormatter formatter = new BinaryFormatter();
-            //using (MemoryStream stream = new MemoryStream(buffer))
-            //{
-            //    var board = formatter.Deserialize(stream);
-            //    Board = board as Board;
-
-            //    if (!_receiver.IsBusy)
-            //    {
-            //        _receiver.RunWorkerAsync();
-            //    }
-
-            //    CreateBoard(this.Board);
-            //}
-
-            //try
-            //{
-            //    if (_client?.Connected == true)
-            //    {
-
-            //        IFormatter formatter = new BinaryFormatter();
-            //        using (NetworkStream stream = _client.GetStream())
-            //        {
-            //            var board = formatter.Deserialize(stream);
-            //            Board = board as Board;
-
-            //            CreateBoard(this.Board);
-            //        }
-            //    }
-            //}
-            //catch (Exception ex)
-            //{
-            //    MessageBox.Show(ex.Message);
-            //}
+                Debug.WriteLine(unparsedBoard);
+                Board board = new Board();
+                board.Parse(unparsedBoard);
+                Debug.Write(board.ToString());
+                board.CopyTo(Board);
+                CreateBoard();
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show(ex.Message);
+            }
         }
 
         private void CheckersForm_FormClosing(object sender, FormClosingEventArgs e)
@@ -927,10 +919,10 @@ namespace Checkers.Forms.Forms
 
             try
             {
-                //_reader = new StreamReader(TCPServer.Instance.Client.GetStream());
-                //_writer = new StreamWriter(TCPServer.Instance.Client.GetStream());
-                //_writer.AutoFlush = true;
-                _stream = new MemoryStream();
+                _reader = new StreamReader(TCPServer.Instance.Client.GetStream());
+                _writer = new StreamWriter(TCPServer.Instance.Client.GetStream());
+                _writer.AutoFlush = true;
+                //_stream = TCPServer.Instance.Client.GetStream();
                 //TCPServer.Instance.Client.GetStream().CopyTo(_stream);
                 backgroundWorker1.RunWorkerAsync();
                 backgroundWorker2.WorkerSupportsCancellation = true;
@@ -963,11 +955,9 @@ namespace Checkers.Forms.Forms
             {
                 try
                 {
-                    IFormatter formatter = new BinaryFormatter();
-                    var board = formatter.Deserialize(_stream);
-                    Board = board as Board;
-                    CreateBoard(this.Board);
-                    _stream.Flush();
+                    unparsedBoard = _reader.ReadToEnd();
+                    ReceiveMove(unparsedBoard);
+                    unparsedBoard = string.Empty;
                 }
                 catch (Exception ex)
                 {
@@ -980,8 +970,7 @@ namespace Checkers.Forms.Forms
         {
             if (TCPServer.Instance.Client.Connected)
             {
-                IFormatter formatter = new BinaryFormatter();
-                formatter.Serialize(_stream, this.Board);
+                Board.WriteToStream(_writer);
             }
             else
             {
@@ -989,6 +978,17 @@ namespace Checkers.Forms.Forms
             }
 
             backgroundWorker2.CancelAsync();
+        }
+
+        private void backgroundWorker1_RunWorkerCompleted(object sender, RunWorkerCompletedEventArgs e)
+        {
+            if(TCPServer.Instance.Client.Connected)
+                backgroundWorker1.RunWorkerAsync();
+        }
+
+        private void backgroundWorker2_RunWorkerCompleted(object sender, RunWorkerCompletedEventArgs e)
+        {
+            
         }
     }
 }
