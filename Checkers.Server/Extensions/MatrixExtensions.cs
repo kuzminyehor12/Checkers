@@ -28,7 +28,7 @@ namespace Checkers.Forms.Extensions
 
         public static void WriteToStream(this Board board, StreamWriter writer)
         {
-            string res = "";
+            string res = string.Empty;
 
             for (int i = 0; i < board.GetSize(); i++)
             {

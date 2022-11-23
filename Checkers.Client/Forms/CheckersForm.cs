@@ -1,6 +1,9 @@
-﻿using Checkers.Client.Networking;
+﻿using Checkers.Client.Enum;
+using Checkers.Client.Models;
+using Checkers.Client.Networking;
 using Checkers.Forms.Extensions;
 using Checkers.Forms.Models;
+using Checkers.Server.DataManagement;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
@@ -21,19 +24,21 @@ namespace Checkers.Forms.Forms
     {
         private const string PicturePath = @"C:\Users\EgorKuzmin\Pictures\Saved Pictures\";
         private readonly Size PictureSize;
+        public User CurrentUser { get; private set; }
+        public GameMode Mode { get; private set; }
         public string CurrentTurn { get; set; } = "Opponent`s Turn";
         public string AlternativeTurn { get; set; } = "Your Turn";
 
         private int _boardSize;
         private const int CellSize = 100;
         public Board Board { get; set; }
+        private readonly IUserService _userService;
 
         private List<Button> _simpleSteps = new List<Button>();
         private int _beatStepsCount = 0;
         private bool _hasContinue = false;
         private Button[,] _checkers;
 
-        //private Stream _stream;
         private StreamReader _reader;
         private StreamWriter _writer;
 
@@ -44,10 +49,11 @@ namespace Checkers.Forms.Forms
 
         private Image _blackChecker;
         private Image _whiteChecker;
-        public CheckersForm()
+        public CheckersForm(User currentUser)
         {
             InitializeComponent();
             CheckForIllegalCrossThreadCalls = false;
+            _userService = new UserService();
 
             PictureSize = new Size(CellSize - 10, CellSize - 10);
             Board = new Board();
@@ -55,42 +61,10 @@ namespace Checkers.Forms.Forms
 
             _checkers = new Button[_boardSize, _boardSize];
             CurrentPlayer = 2;
-            //SetGame();
+            CurrentUser = currentUser;
         }
         public void SetGame()
         {
-            //if (isHost)
-            //{
-            //    CurrentPlayer = 1;
-            //    //_server = new TcpListener(IPAddress.Any, Port);
-            //    //_server.Start();
-            //    //_socket = _server.AcceptSocket();
-            //}
-            //else
-            //{
-            //    try
-            //    {
-            //        CurrentPlayer = 2;
-            //        //_client = new TcpClient(ip, Port);
-            //        //_socket = _client.Client;
-            //        //_receiver.RunWorkerAsync();
-            //    }
-            //    catch (Exception ex)
-            //    {
-            //        MessageBox.Show(ex.Message);
-            //        Close();
-            //    }
-            //}
-
-            //if (CurrentPlayer == 1)
-            //{
-            //    label2.Text = "Your Turn";
-            //}
-            //else
-            //{
-            //    label2.Text = "Opponent`s Turn";
-            //}
-
             IsInTurn = false;
             PreviousButton = null;
 
@@ -178,11 +152,6 @@ namespace Checkers.Forms.Forms
 
         public void OnCheckerPressed(object sender, EventArgs args)
         {
-            //this.Invoke(new Action(() =>
-            //{
-               
-            //}));
-
             if (PreviousButton != null)
             {
                 PreviousButton.BackColor = GetPrevButtonColor(PreviousButton);
@@ -195,7 +164,7 @@ namespace Checkers.Forms.Forms
             {
                 CloseSteps();
                 PressedButton.BackColor = Color.Red;
-               DeactivateAllButtons();
+                DeactivateAllButtons();
                 PressedButton.Enabled = true;
                 _beatStepsCount = 0;
 
@@ -278,8 +247,8 @@ namespace Checkers.Forms.Forms
 
         public void SwitchPlayer()
         {
-            //this.Text = AlternativeTurn;
-            //ResetGame();
+            this.Text = AlternativeTurn;
+            ResetGame();
         }
 
         public void ResetGame()
@@ -305,6 +274,8 @@ namespace Checkers.Forms.Forms
 
             if (!isPlayer1HasCheckers)
             {
+                CurrentUser.VictoriesQuantity++;
+                _userService.UpdateUser(CurrentUser);
                 MessageBox.Show("You win!");
             }
             else if(!isPlayer2HasCheckers)
@@ -878,9 +849,9 @@ namespace Checkers.Forms.Forms
         {
             try
             {
-                //CurrentTurn = "Your Turn";
-                //AlternativeTurn = "Opponent`s Turn";
-                //this.Text = CurrentTurn;
+                CurrentTurn = "Your Turn";
+                AlternativeTurn = "Opponent`s Turn";
+                this.Text = CurrentTurn;
                 Board.Parse(unparsedBoard);
                 CreateBoardWithBackgroundWorker();
             }
@@ -903,7 +874,6 @@ namespace Checkers.Forms.Forms
             {
                 if (TCPClient.Instance.Client.Connected)
                 {
-                    //_stream = TCPClient.Instance.Client.GetStream();
                     _reader = new StreamReader(TCPClient.Instance.Client.GetStream());
                     _writer = new StreamWriter(TCPClient.Instance.Client.GetStream());
                     _writer.AutoFlush = true;
@@ -922,6 +892,9 @@ namespace Checkers.Forms.Forms
 
         private void CheckersForm_FormClosed(object sender, FormClosedEventArgs e)
         {
+            _writer.WriteLine("Disconnect");
+            TCPClient.Instance.Client.Close();
+            TCPClient.Instance.Client.Dispose();
             ConnectionForm connection = new ConnectionForm();
             connection.Show();
         }
@@ -943,18 +916,36 @@ namespace Checkers.Forms.Forms
             {
                 try
                 {
-                    var unparsedBoard = _reader.ReadLine();
+                    var unparsed = _reader.ReadLine();
 
-                    if (!string.IsNullOrEmpty(unparsedBoard))
+                    if (string.IsNullOrEmpty(unparsed))
                     {
-                        ReceiveMove(unparsedBoard);
+                        return;
                     }
+
+                    if (unparsed.IsGameMode())
+                    {
+                        Mode = (GameMode)int.Parse(unparsed);
+                        return;
+                    }
+
+                    if (unparsed.Contains("Disconnect"))
+                    {
+                        MessageBox.Show("Opponent has been disconnected");
+                        this.Close();
+                        return;
+                    }
+
+                    ReceiveMove(unparsed);
                 }
-                catch (Exception ex)
+                catch (Exception)
                 {
-                    MessageBox.Show(ex.Message);
+                    
                 }
             }
+
+            MessageBox.Show("You has been disconnected");
+            this.Close();
         }
 
         private void backgroundWorker2_DoWork(object sender, DoWorkEventArgs e)
