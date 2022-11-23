@@ -259,7 +259,6 @@ namespace Checkers.Forms.Forms
                     {
                         CloseSteps();
                         SwitchPlayer();
-                        backgroundWorker2.RunWorkerAsync();
                         ShowPossibleSteps();
                         _hasContinue = false;
                     }
@@ -269,6 +268,8 @@ namespace Checkers.Forms.Forms
                         PressedButton.Enabled = true;
                         IsInTurn = true;
                     }
+
+                    backgroundWorker2.RunWorkerAsync();
                 }
             }
 
