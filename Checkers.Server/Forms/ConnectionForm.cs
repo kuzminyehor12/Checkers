@@ -1,4 +1,5 @@
-﻿using Checkers.Server.DataManagement;
+﻿using Checkers.Client.Forms;
+using Checkers.Server.DataManagement;
 using Checkers.Server.Enums;
 using Checkers.Server.Models;
 using Checkers.Server.Networking;
@@ -61,7 +62,8 @@ namespace Checkers.Forms.Forms
                 CurrentUser = new User
                 {
                     Nickname = textBox4.Text,
-                    VictoriesQuantity = 0
+                    VictoriesQuantity = 0,
+                    Points = 0
                 };
 
                 _userService.CreateUser(CurrentUser);
@@ -110,10 +112,17 @@ namespace Checkers.Forms.Forms
 
         private void ConnectionForm_FormClosed(object sender, FormClosedEventArgs e)
         {
-            TCPServer.Instance.Client.Close();
-            TCPServer.Instance.Client.Dispose();
+            if (TCPServer.Instance.Client != null)
+            {
+                TCPServer.Instance.Client.Close();
+            }
+        }
 
-            TCPServer.Instance.Listener.Stop();
+        private void button1_Click(object sender, EventArgs e)
+        {
+            LeaderboardForm leaderboard = new LeaderboardForm();
+            leaderboard.Show();
+            Visible = false;
         }
     }
 }

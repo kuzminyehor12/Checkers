@@ -45,7 +45,7 @@ namespace Checkers.Forms.Extensions
         {
             if (string.IsNullOrEmpty(unparsed))
             {
-                return; 
+                return;
             }
 
             string[] rows = new string[board.GetSize()];

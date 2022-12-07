@@ -1,9 +1,10 @@
-﻿using Checkers.Client.Enum;
-using Checkers.Client.Models;
-using Checkers.Client.Networking;
+﻿using Checkers.Client.Networking;
+using Checkers.Extra.DataManagement;
 using Checkers.Forms.Extensions;
 using Checkers.Forms.Models;
 using Checkers.Server.DataManagement;
+using Checkers.Server.Enums;
+using Checkers.Server.Models;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
@@ -25,14 +26,18 @@ namespace Checkers.Forms.Forms
         private const string PicturePath = @"C:\Users\EgorKuzmin\Pictures\Saved Pictures\";
         private readonly Size PictureSize;
         public User CurrentUser { get; private set; }
+        public string OpponentName { get; private set; }
+        public Session CurrentSession { get; private set; }
+        public int CurrentStage { get; private set; }
         public GameMode Mode { get; private set; }
-        public string CurrentTurn { get; set; } = "Opponent`s Turn";
-        public string AlternativeTurn { get; set; } = "Your Turn";
+        public string CurrentTurn { get; set; }
+        public string AlternativeTurn { get; set; }
 
         private int _boardSize;
         private const int CellSize = 100;
         public Board Board { get; set; }
         private readonly IUserService _userService;
+        private readonly ISessionService _sessionService;
 
         private List<Button> _simpleSteps = new List<Button>();
         private int _beatStepsCount = 0;
@@ -41,7 +46,6 @@ namespace Checkers.Forms.Forms
 
         private StreamReader _reader;
         private StreamWriter _writer;
-
         public int CurrentPlayer { get; private set; }
         public bool IsInTurn { get; private set; }
         public Button PreviousButton { get; private set; }
@@ -49,11 +53,12 @@ namespace Checkers.Forms.Forms
 
         private Image _blackChecker;
         private Image _whiteChecker;
-        public CheckersForm(User currentUser)
+        public CheckersForm(User currentUser, int stage = 1)
         {
             InitializeComponent();
             CheckForIllegalCrossThreadCalls = false;
             _userService = new UserService();
+            _sessionService = new SessionService();
 
             PictureSize = new Size(CellSize - 10, CellSize - 10);
             Board = new Board();
@@ -62,16 +67,22 @@ namespace Checkers.Forms.Forms
             _checkers = new Button[_boardSize, _boardSize];
             CurrentPlayer = 2;
             CurrentUser = currentUser;
+            CurrentStage = stage;
         }
         public void SetGame()
         {
+            CurrentTurn = "Opponent`s Turn";
+            AlternativeTurn = "Your Turn";
+
             IsInTurn = false;
             PreviousButton = null;
 
             _blackChecker = new Bitmap(new Bitmap(PicturePath + "black-removebg-preview.png"), PictureSize);
             _whiteChecker = new Bitmap(new Bitmap(PicturePath + "red-removebg-preview.png"), PictureSize);
 
+            Controls.Clear();            
             CreateBoard();
+            DisableAllButtons();
         }
 
         public void CreateBoardWithBackgroundWorker()
@@ -230,6 +241,7 @@ namespace Checkers.Forms.Forms
                         SwitchPlayer();
                         ShowPossibleSteps();
                         _hasContinue = false;
+                        DisableAllButtons();
                     }
                     else if (_hasContinue)
                     {
@@ -247,6 +259,7 @@ namespace Checkers.Forms.Forms
 
         public void SwitchPlayer()
         {
+            timer2.Stop();
             this.Text = AlternativeTurn;
             ResetGame();
         }
@@ -272,15 +285,126 @@ namespace Checkers.Forms.Forms
                 }
             }
 
-            if (!isPlayer1HasCheckers)
+            DefineGameResult(isPlayer1HasCheckers, isPlayer2HasCheckers);
+        }
+
+        private void DefineGameResult(bool isPlayer1HasCheckers, bool isPlayer2HasCheckers)
+        {
+            if(isPlayer1HasCheckers && isPlayer2HasCheckers)
             {
-                CurrentUser.VictoriesQuantity++;
-                _userService.UpdateUser(CurrentUser);
-                MessageBox.Show("You win!");
+                return;
             }
-            else if(!isPlayer2HasCheckers)
+
+            switch (Mode)
             {
-                MessageBox.Show("You lose!");
+                case GameMode.BO1:
+                    if (!isPlayer1HasCheckers)
+                    {
+                        CurrentUser.VictoriesQuantity++;
+                        _userService.UpdateUser(CurrentUser);
+                        MessageBox.Show("You win!");
+                    }
+                    else if (!isPlayer2HasCheckers)
+                    {
+                        MessageBox.Show("You lose!");
+                    }
+
+                    backgroundWorker1.CancelAsync();
+                    _writer.WriteLine("Endgame");
+                    this.Close();
+                    break;
+                case GameMode.BO3:
+                    if (CurrentStage < 3)
+                    {
+                        if (!isPlayer1HasCheckers)
+                        {
+                            CurrentSession.SecondPlayerSessionVictoriesCount++;
+                        }
+                        else if (!isPlayer2HasCheckers)
+                        {
+                            CurrentSession.FirstPlayerSessionVictoriesCount++;
+                        }
+
+                        _sessionService.UpdateSession(CurrentSession);
+                        Board = new Board();
+                        SetGame();
+                        CurrentStage++;
+                    }
+                    
+                    if(CurrentSession.SecondPlayerSessionVictoriesCount == 2 || CurrentSession.FirstPlayerSessionVictoriesCount == 2)
+                    {
+                        var result = _sessionService.GetSession();
+
+                        if (result.FirstPlayerSessionVictoriesCount > result.SecondPlayerSessionVictoriesCount)
+                        {
+                            MessageBox.Show("You lose!");
+                        }
+                        else if (result.FirstPlayerSessionVictoriesCount < result.SecondPlayerSessionVictoriesCount)
+                        {
+                            CurrentUser.VictoriesQuantity++;
+                            _userService.UpdateUser(CurrentUser);
+                            MessageBox.Show("You win!");
+                        }
+
+                        backgroundWorker1.CancelAsync();
+                        _writer.WriteLine("Endgame");
+                        this.Close();
+                    }
+                    break;
+                case GameMode.BO5:
+                    if (CurrentStage < 5)
+                    {
+                        if (!isPlayer1HasCheckers)
+                        {
+                            CurrentSession.SecondPlayerSessionVictoriesCount++;
+                        }
+                        else if (!isPlayer2HasCheckers)
+                        {
+                            CurrentSession.FirstPlayerSessionVictoriesCount++;
+                        }
+
+                        _sessionService.UpdateSession(CurrentSession);
+                        Board = new Board();
+                        SetGame();
+                        CurrentStage++;
+                    }
+
+                    if(CurrentSession.SecondPlayerSessionVictoriesCount == 3 || CurrentSession.FirstPlayerSessionVictoriesCount == 3)
+                    {
+                        var result = _sessionService.GetSession();
+
+                        if (result.FirstPlayerSessionVictoriesCount > result.SecondPlayerSessionVictoriesCount)
+                        {
+                            MessageBox.Show("You lose!");
+                        }
+                        else if (result.FirstPlayerSessionVictoriesCount < result.SecondPlayerSessionVictoriesCount)
+                        {
+                            CurrentUser.VictoriesQuantity++;
+                            _userService.UpdateUser(CurrentUser);
+                            MessageBox.Show("You win!");
+                        }
+
+                        backgroundWorker1.CancelAsync();
+                        _writer.WriteLine("Endgame");
+                        this.Close();
+                    }
+                    break;
+                default:
+                    if (!isPlayer1HasCheckers)
+                    {
+                        CurrentUser.VictoriesQuantity++;
+                        _userService.UpdateUser(CurrentUser);
+                        MessageBox.Show("You win!");
+                    }
+                    else if (!isPlayer2HasCheckers)
+                    {
+                        MessageBox.Show("You lose!");
+                    }
+
+                    backgroundWorker1.CancelAsync();
+                    _writer.WriteLine("Endgame");
+                    this.Close();
+                    break;
             }
         }
 
@@ -328,6 +452,7 @@ namespace Checkers.Forms.Forms
                 button.Text = "King";
 
             }
+
             if (Board[button.GetRelativeY(CellSize), button.GetRelativeX(CellSize)] == 2 && button.GetRelativeY(CellSize) == 0)
             {
                 button.Text = "King";
@@ -351,10 +476,14 @@ namespace Checkers.Forms.Forms
                 Board[rowIndex, columnIndex] = 0;
                 _checkers[rowIndex, columnIndex].Image = null;
                 _checkers[rowIndex, columnIndex].Text = "";
+
+                CurrentUser.Points += 3;
+
                 rowIndex += startIndexY;
                 columnIndex += startIndexX;
             }
 
+            _userService.UpdateUser(CurrentUser);
         }
 
         public void ShowSteps(int rowIndex, int columnIndex, bool isNotKing = true)
@@ -834,13 +963,27 @@ namespace Checkers.Forms.Forms
             }
         }
 
-        public void DeactivateAllButtons()
+        public void DisableAllButtons()
         {
             foreach (var control in Controls)
             {
-                if(control is Button b)
+                if (control is Button b)
                 {
                     b.Enabled = false;
+                }
+            }
+        }
+
+        public void DeactivateAllButtons()
+        {
+            for (int i = 0; i < _boardSize; i++)
+            {
+                for (int j = 0; j < _boardSize; j++)
+                {
+                    if (Board[i, j] == 0)
+                    {
+                        _checkers[i, j].Enabled = false;
+                    }
                 }
             }
         }
@@ -849,11 +992,13 @@ namespace Checkers.Forms.Forms
         {
             try
             {
+                ActivateAllButtons();
                 CurrentTurn = "Your Turn";
                 AlternativeTurn = "Opponent`s Turn";
                 this.Text = CurrentTurn;
                 Board.Parse(unparsedBoard);
                 CreateBoardWithBackgroundWorker();
+                this.Invoke(new Action(() => timer2.Start()));
             }
             catch (Exception ex)
             {
@@ -877,9 +1022,15 @@ namespace Checkers.Forms.Forms
                     _reader = new StreamReader(TCPClient.Instance.Client.GetStream());
                     _writer = new StreamWriter(TCPClient.Instance.Client.GetStream());
                     _writer.AutoFlush = true;
+
                     backgroundWorker1.RunWorkerAsync();
-                    backgroundWorker1.WorkerSupportsCancellation = false;
+                    backgroundWorker1.WorkerSupportsCancellation = true;
                     backgroundWorker2.WorkerSupportsCancellation = true;
+
+                    if(CurrentStage == 1)
+                    {
+                        _writer.WriteLine("Nick: " + CurrentUser?.Nickname);
+                    }
                 }
             }
             catch (Exception ex)
@@ -892,11 +1043,29 @@ namespace Checkers.Forms.Forms
 
         private void CheckersForm_FormClosed(object sender, FormClosedEventArgs e)
         {
-            _writer.WriteLine("Disconnect");
-            TCPClient.Instance.Client.Close();
-            TCPClient.Instance.Client.Dispose();
-            ConnectionForm connection = new ConnectionForm();
-            connection.Show();
+            try
+            {
+                if (!backgroundWorker1.CancellationPending)
+                {
+                    _writer?.WriteLine("Disconnect");
+                    backgroundWorker1.CancelAsync();
+                }
+
+                _sessionService.RemoveSession();
+                TCPClient.Instance.Client.GetStream().Close();
+                TCPClient.Instance.Client.Close();
+                TCPClient.Instance.Client = new TcpClient();
+            }
+            catch (Exception)
+            {
+
+
+            }
+            finally
+            {
+                ConnectionForm connection = new ConnectionForm();
+                connection.Show();
+            }
         }
 
         private void timer1_Tick(object sender, EventArgs e)
@@ -916,6 +1085,7 @@ namespace Checkers.Forms.Forms
             {
                 try
                 {
+                    ResetGame();
                     var unparsed = _reader.ReadLine();
 
                     if (string.IsNullOrEmpty(unparsed))
@@ -925,7 +1095,27 @@ namespace Checkers.Forms.Forms
 
                     if (unparsed.IsGameMode())
                     {
-                        Mode = (GameMode)int.Parse(unparsed);
+                        Mode = (GameMode)Enum.Parse(typeof(GameMode), unparsed);
+                        return;
+                    }
+
+                    if (unparsed.Contains("Nick:"))
+                    {
+                        OpponentName = unparsed.Substring(6);
+                        CurrentSession = new Session
+                        {
+                            FirstNickname = OpponentName,
+                            FirstPlayerSessionVictoriesCount = 0,
+                            SecondNickname = CurrentUser.Nickname,
+                            SecondPlayerSessionVictoriesCount = 0
+                        };
+                        _sessionService.CreateSession(CurrentSession);
+                        return;
+                    }
+
+                    if (unparsed.Contains("Endgame"))
+                    {
+                        this.Close();
                         return;
                     }
 
@@ -971,6 +1161,12 @@ namespace Checkers.Forms.Forms
         private void backgroundWorker2_RunWorkerCompleted(object sender, RunWorkerCompletedEventArgs e)
         {
             
+        }
+
+        private void timer2_Tick(object sender, EventArgs e)
+        {
+            _writer.WriteLine("Disconnect");
+            this.Close();
         }
     }
 }

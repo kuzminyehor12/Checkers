@@ -33,6 +33,7 @@ namespace Checkers.Forms.Forms
             this.backgroundWorker1 = new System.ComponentModel.BackgroundWorker();
             this.backgroundWorker2 = new System.ComponentModel.BackgroundWorker();
             this.timer1 = new System.Windows.Forms.Timer(this.components);
+            this.timer2 = new System.Windows.Forms.Timer(this.components);
             this.SuspendLayout();
             // 
             // backgroundWorker1
@@ -49,6 +50,11 @@ namespace Checkers.Forms.Forms
             // 
             this.timer1.Interval = 1000;
             this.timer1.Tick += new System.EventHandler(this.timer1_Tick);
+            // 
+            // timer2
+            // 
+            this.timer2.Interval = 120000;
+            this.timer2.Tick += new System.EventHandler(this.timer2_Tick);
             // 
             // CheckersForm
             // 
@@ -70,5 +76,6 @@ namespace Checkers.Forms.Forms
         private System.ComponentModel.BackgroundWorker backgroundWorker1;
         private System.ComponentModel.BackgroundWorker backgroundWorker2;
         private System.Windows.Forms.Timer timer1;
+        private System.Windows.Forms.Timer timer2;
     }
 }

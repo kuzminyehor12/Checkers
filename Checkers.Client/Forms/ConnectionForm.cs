@@ -1,6 +1,7 @@
-﻿using Checkers.Client.Models;
+﻿using Checkers.Client.Forms;
 using Checkers.Client.Networking;
 using Checkers.Server.DataManagement;
+using Checkers.Server.Models;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
@@ -41,7 +42,8 @@ namespace Checkers.Forms.Forms
                 CurrentUser = new User
                 {
                     Nickname = textBox4.Text,
-                    VictoriesQuantity = 0
+                    VictoriesQuantity = 0,
+                    Points = 0
                 };
 
                 _userService.CreateUser(CurrentUser);
@@ -70,6 +72,13 @@ namespace Checkers.Forms.Forms
         {
             TCPClient.Instance.Client.Close();
             TCPClient.Instance.Client.Dispose();
+        }
+
+        private void button1_Click(object sender, EventArgs e)
+        {
+            LeaderboardForm leaderboard = new LeaderboardForm();
+            leaderboard.Show();
+            Visible = false;
         }
     }
 }

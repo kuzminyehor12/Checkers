@@ -1,4 +1,4 @@
-﻿using Checkers.Client.Models;
+﻿using Checkers.Server.Models;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using System;
@@ -65,7 +65,8 @@ namespace Checkers.Server.DataManagement
         {
             var json = File.ReadAllText(Path);
             var jsonArray = JArray.Parse(json);
-            jsonArray.First(e => e["Nickname"].Value<string>() == model.Nickname)["VictoriesCount"] = model.VictoriesQuantity;
+            jsonArray.First(e => e["Nickname"].Value<string>() == model.Nickname)["VictoriesQuantity"] = model.VictoriesQuantity;
+            jsonArray.First(e => e["Nickname"].Value<string>() == model.Nickname)["Points"] = model.Points;
             string jsonResult = JsonConvert.SerializeObject(jsonArray, Formatting.Indented);
             File.WriteAllText(Path, jsonResult);
         }

@@ -8,5 +8,6 @@ namespace Checkers.Server.Models
     {
         public string Nickname { get; set; }
         public int VictoriesQuantity { get; set; }
+        public int Points { get; set; }
     }
 }

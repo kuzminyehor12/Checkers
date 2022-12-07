@@ -38,11 +38,11 @@ namespace Checkers.Client.Networking
         {
             try
             {
-                Client.BeginConnect(IPAddress.Parse(ip), int.Parse(port), ConnectCallback, null);
+                Client.BeginConnect(IPAddress.Parse(ip), int.Parse(port), ConnectCallback, new object());
             }
             catch (Exception ex)
             {
-                MessageBox.Show(ex.Message.ToString());
+                MessageBox.Show(ex.Message);
                 Client.Dispose();
                 Client = null;
             }
@@ -56,7 +56,7 @@ namespace Checkers.Client.Networking
             }
             catch (Exception ex)
             {
-                MessageBox.Show(ex.Message.ToString());
+                MessageBox.Show(ex.Message);
             }
         }
     }

@@ -1,4 +1,4 @@
-﻿using Checkers.Client.Enum;
+﻿using Checkers.Server.Enums;
 using System;
 using System.Collections.Generic;
 using System.Drawing;
