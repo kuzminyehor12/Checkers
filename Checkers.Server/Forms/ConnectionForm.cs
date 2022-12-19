@@ -3,6 +3,7 @@ using Checkers.Server.DataManagement;
 using Checkers.Server.Enums;
 using Checkers.Server.Models;
 using Checkers.Server.Networking;
+using PawnShop.Forms.Forms.BaseForms;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
@@ -11,6 +12,7 @@ using System.Drawing;
 using System.IO;
 using System.Linq;
 using System.Net;
+using System.Net.NetworkInformation;
 using System.Net.Sockets;
 using System.Text;
 using System.Text.Json;
@@ -44,24 +46,37 @@ namespace Checkers.Forms.Forms
             }
 
             return null;
+
+            //IPAddress[] localIp = Dns.GetHostAddresses(Dns.GetHostName());
+
+            //string ipadr = "";
+
+            //foreach (var address in localIp)
+            //{
+            //    if (address.AddressFamily == AddressFamily.InterNetwork)
+            //    {
+            //        ipadr = address.ToString();
+            //    }
+            //}
+            //return ipadr;
         }
 
         private void button2_Click(object sender, EventArgs e)
         {
-            if (string.IsNullOrEmpty(textBox4.Text))
+            if (string.IsNullOrEmpty(textBox3.Text))
             {
                 MessageBox.Show("Nickname is required to play");
                 return;
             }
 
             var users = _userService.GetUsers();
-            CurrentUser = users.FirstOrDefault(u => u.Nickname == textBox4.Text);
+            CurrentUser = users.FirstOrDefault(u => u.Nickname == textBox3.Text);
 
             if(CurrentUser is null)
             {
                 CurrentUser = new User
                 {
-                    Nickname = textBox4.Text,
+                    Nickname = textBox3.Text,
                     VictoriesQuantity = 0,
                     Points = 0
                 };
@@ -108,6 +123,8 @@ namespace Checkers.Forms.Forms
         private void ConnectionForm_Load(object sender, EventArgs e)
         {
             timer1.Start();
+            AuthorizationForm authForm = new AuthorizationForm();
+            authForm.Show();
         }
 
         private void ConnectionForm_FormClosed(object sender, FormClosedEventArgs e)

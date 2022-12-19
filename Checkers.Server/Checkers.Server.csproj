@@ -15,6 +15,12 @@
   </ItemGroup>
 
   <ItemGroup>
+    <Reference Include="CustomAuth">
+      <HintPath>..\..\CustomAuth\CustomAuth\bin\Debug\netcoreapp3.1\CustomAuth.dll</HintPath>
+    </Reference>
+  </ItemGroup>
+
+  <ItemGroup>
     <Compile Update="Forms\CheckersForm.cs">
       <SubType>Form</SubType>
     </Compile>

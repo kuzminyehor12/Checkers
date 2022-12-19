@@ -295,15 +295,15 @@ namespace Checkers.Forms.Forms
             switch (Mode)
             {
                 case GameMode.BO1:
-                    if (!isPlayer1HasCheckers)
-                    {
-                        MessageBox.Show("You lose!");
-                    }
-                    else if (!isPlayer2HasCheckers)
+                    if (!isPlayer2HasCheckers)
                     {
                         CurrentUser.VictoriesQuantity++;
                         _userService.UpdateUser(CurrentUser);
                         MessageBox.Show("You win!");
+                    }
+                    else
+                    {
+                        MessageBox.Show("You lose!");
                     }
 
                     backgroundWorker1.CancelAsync();
