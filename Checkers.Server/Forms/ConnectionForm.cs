@@ -124,7 +124,19 @@ namespace Checkers.Forms.Forms
         {
             timer1.Start();
             AuthorizationForm authForm = new AuthorizationForm();
+            authForm.VisibleChanged += AuthForm_VisibleChanged;
+            authForm.FormClosed += AuthForm_FormClosed;
             authForm.Show();
+        }
+
+        private void AuthForm_VisibleChanged(object sender, EventArgs e)
+        {
+            this.Enabled = !this.Enabled;
+        }
+
+        private void AuthForm_FormClosed(object sender, FormClosedEventArgs e)
+        {
+            this.Close();
         }
 
         private void ConnectionForm_FormClosed(object sender, FormClosedEventArgs e)
