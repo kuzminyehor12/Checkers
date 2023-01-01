@@ -29,7 +29,7 @@ namespace Checkers.Client.Networking
             }
         }
 
-        public TCPClient()
+        private TCPClient()
         {
             Client = new TcpClient();
         }

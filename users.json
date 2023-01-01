@@ -1,0 +1,32 @@
+[
+  {
+    "Nickname": "Yehor",
+    "VictoriesQuantity": 9,
+    "Points": 455
+  },
+  {
+    "Nickname": "Ilya",
+    "VictoriesQuantity": 8,
+    "Points": 346
+  },
+  {
+    "Nickname": "Maskim",
+    "VictoriesQuantity": 5,
+    "Points": 256
+  },
+  {
+    "Nickname": "Anton",
+    "VictoriesQuantity": 6,
+    "Points": 258
+  },
+  {
+    "Nickname": "Yura",
+    "VictoriesQuantity": 6,
+    "Points": 270
+  },
+  {
+    "Nickname": "Vanya",
+    "VictoriesQuantity": 8,
+    "Points": 335
+  }
+]

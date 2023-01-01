@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Checkers.Server.Enums;
+using System;
 using System.Collections.Generic;
 using System.Drawing;
 using System.IO;
@@ -53,6 +54,11 @@ namespace Checkers.Forms.Extensions
                 object obj = bf.Deserialize(ms);
                 return obj as Image;
             }
+        }
+
+        public static bool IsGameMode(this string unparsed)
+        {
+            return unparsed.Contains(GameMode.BO1.ToString()) || unparsed.Contains(GameMode.BO3.ToString()) || unparsed.Contains(GameMode.BO5.ToString());
         }
     }
 }
